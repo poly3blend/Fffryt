@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poly3Blend — 3D Art & Assets</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0f;
+    --bg2: #0d1018;
+    --accent: #c8ff00;
+    --accent2: #ff6b35;
+    --text: #e8eaf0;
+    --muted: #5a5f72;
+    --border: rgba(200,255,0,0.12);
+    --card: #0f1219;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(200,255,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,255,0,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    background: rgba(8,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .logo span { color: var(--text); }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--accent); }
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 5rem;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200,255,0,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(255,107,53,0.06) 0%, transparent 60%);
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.3rem 0.8rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3.5rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    display: block;
+  }
+  .hero-sub {
+    max-width: 480px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--muted);
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-scroll {
+    position: absolute;
+    right: 3rem;
+    bottom: 3rem;
+    writing-mode: vertical-rl;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .hero-scroll::after {
+    content: '';
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+  }
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 3rem;
+  }
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+  .featured {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .featured-main {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16/7;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f1219, #1a1f2a);
+  }
+  .featured-main .placeholder-text {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+  .featured-main .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(8,10,15,0.9) 0%, transparent 50%);
+    display: flex;
+    align-items: flex-end;
+    padding: 2.5rem;
+  }
+  .featured-main .overlay-content h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+  .featured-main .overlay-content p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .product-card {
+    background: var(--card);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease;
+  }
+  .product-card:hover { background: #111520; }
+  .product-card:hover::before { height: 100%; }
+  .product-card .tag-available {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .product-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+  .product-card p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .product-card .price {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .product-card .price span {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-left: 0.3rem;
+    font-weight: 400;
+  }
+  .buy-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .buy-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+  }
+  .buy-section h2 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .buy-section p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+  }
+  .steps { display: flex; flex-direction: column; gap: 1.2rem; }
+  .step { display: flex; gap: 1rem; align-items: flex-start; }
+  .step-num {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-weight: 700;
+  }
+  .step-text {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+    padding-top: 0.2rem;
+  }
+  .step-text strong { color: var(--text); }
+  .wallet-box {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    background: var(--bg);
+  }
+  .wallet-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .wallet-addr {
+    font-size: 0.72rem;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(200,255,0,0.04);
+    border: 1px solid rgba(200,255,0,0.08);
+  }
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .qr-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background: white;
+    width: fit-content;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+  .qr-placeholder {
+    width: 160px;
+    height: 160px;
+    background: #1a1f2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-align: center;
+    border-radius: 8px;
+  }
+  .contact-box {
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    background: var(--card);
+    margin-top: 1px;
+  }
+  .contact-box h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .contact-box p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .contact-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input, .field textarea, .field select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: var(--bg); }
+  .field-full { grid-column: 1 / -1; }
+  .submit-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--text); transform: translateY(-2px); }
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.05em; }
+  footer a { color: var(--muted); text-decoration: none; font-size: 0.65rem; transition: color 0.2s; }
+  footer a:hover { color: var(--accent); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 1;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .hero { padding: 0 1.5rem 4rem; }
+    section { padding: 4rem 1.5rem; }
+    .hero h1 { font-size: clamp(2.5rem, 12vw, 5rem); }
+    .buy-section { grid-template-columns: 1fr; gap: 2rem; padding: 1.5rem; }
+    .contact-fields { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+
+  .slideshow { position: relative; width: 100%; }
+  .slide { display: none; }
+  .slide.active { display: block; }
+  .slide-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(8,10,15,0.7);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .slide-btn:hover { background: rgba(200,255,0,0.15); }
+  .slide-prev { left: 1rem; }
+  .slide-next { right: 1rem; }
+  .slide-dots {
+    position: absolute;
+    bottom: 1rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .dot.active { opacity: 1; background: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">Poly3<span>Blend</span></a>
+  <div style="display:flex;gap:2rem;">
+    <a href="#work">Work</a>
+    <a href="#shop">Shop</a>
+    <a href="#buy">How to Buy</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-tag">3D Art & Digital Assets</div>
+  <h1>
+    Worlds Built<br>
+    <em>Pixel by Pixel.</em>
+  </h1>
+  <p class="hero-sub">
+    Cinematic 3D renders, sci-fi environments, and Blender assets crafted with obsessive detail. 
+    Available for purchase — pay with USDT, no accounts, no borders.
+  </p>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- FEATURED WORK -->
+<section id="work" style="padding-top:0;">
+  <div class="section-label">Featured Work</div>
+  <div class="featured reveal" style="position:relative;">
+    <div class="slideshow">
+      <div class="slide active">
+        <div class="featured-main">
+          <img src="https://i.postimg.cc/bwHcNzf6/dystopian-eye-city.jpg" alt="Dystopian Eye City — Poly3Blend">
+          <div class="overlay">
+            <div class="overlay-content">
+              <h3>Dystopian Eye City</h3>
+              <p>Blender · EEVEE · Sci-fi Environment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="featured-main">
+          <img src="https://i.postimg.cc/9M0hPQgJ/1000006966.jpg" alt="Blender Galaxy Generator — Poly3Blend">
+          <div class="overlay">
+            <div class="overlay-content">
+              <h3>Blender Galaxy Generator</h3>
+              <p>Blender · Shader Editor · Procedural</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Arrows -->
+    <button class="slide-btn slide-prev" onclick="changeSlide(-1)">&#8592;</button>
+    <button class="slide-btn slide-next" onclick="changeSlide(1)">&#8594;</button>
+    <!-- Dots -->
+    <div class="slide-dots">
+      <span class="dot active" onclick="goToSlide(0)"></span>
+      <span class="dot" onclick="goToSlide(1)"></span>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop">
+  <div class="section-label">Shop</div>
+  <div class="shop-grid reveal">
+    <div class="product-card">
+      <div class="tag-available">Available</div>
+      <h3>Dystopian Eye City</h3>
+      <p>Full Blender scene file. Procedural materials, HDRI lighting, EEVEE-ready. Includes all textures and geometry nodes.</p>
+      <div class="price">$4.99 <span>USDT</span> / 3 <span>TON</span></div>
+    </div>
+    <div class="product-card">
+      <div class="tag-available">Available</div>
+      <h3>Blender Galaxy Generator</h3>
+      <img src="https://i.postimg.cc/9M0hPQgJ/1000006966.jpg" alt="Blender Galaxy Generator" style="width:100%;border-radius:4px;margin:1rem 0;object-fit:cover;max-height:160px;">
+      <p>Procedural galaxy generator built entirely in the shader editor. Fully customizable — change colors, arm density, and scale with ease.</p>
+      <div class="price">$10 <span>USDT</span> / 7 <span>TON</span></div>
+    </div>
+    <div class="product-card">
+      <div class="tag-available">Available</div>
+      <h3>Asteroid Generator</h3>
+      <img src="https://i.postimg.cc/Dwhq7njr/1000008085.jpg" alt="Asteroid Generator" style="width:100%;border-radius:4px;margin:1rem 0;object-fit:cover;max-height:160px;">
+      <p>Includes 3 animations in 2K resolution, the Asteroid Field project file, the Asteroid model, render images, and the Asteroid Generator tool itself.</p>
+      <div class="price">$10 <span>USDT</span> / 7 <span>TON</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO BUY -->
+<section id="buy">
+  <div class="section-label">How to Buy</div>
+  <div class="buy-section reveal">
+    <div>
+      <h2>Pay with <em>USDT</em> or <em>TON.</em><br>No accounts needed.</h2>
+      <p>
+        All purchases are made directly via USDT (TRC20) or TON network. 
+        No sign-ups, no borders, no friction. Send payment, then submit your TX ID — 
+        and you'll receive your files within 24 hours.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-text"><strong>Choose your asset</strong><br>Pick what you want from the shop above and note the price.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-text"><strong>Send USDT (TRC20) or TON</strong><br>Transfer the exact amount to the wallet address on the right.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-text"><strong>Submit your transaction ID</strong><br>Fill out the form below with your TX hash and email.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-text"><strong>Receive your files</strong><br>You'll get a download link within 24 hours. Done.</div>
+        </div>
+      </div>
+      <div style="margin-top:2.5rem; border-top:1px solid var(--border); padding-top:2rem;">
+        <div style="font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;">New to Crypto?</div>
+        <p style="font-size:1.1rem;color:#ff2d2d;font-weight:700;line-height:1.7;margin-bottom:1.2rem;">
+          If you're not familiar with crypto, watch the videos below — it only takes a few minutes:
+        </p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;">
+          <a href="https://youtube.com/watch?v=uF4DuYGJmcc&si=XYy_oo6PMLkD0Fyw" target="_blank" style="display:flex;align-items:center;gap:0.8rem;color:var(--text);text-decoration:none;font-size:0.75rem;padding:0.8rem;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="color:var(--accent);font-weight:700;flex-shrink:0;">01</span>
+            How to create a new wallet
+          </a>
+          <a href="https://youtube.com/watch?v=hxBUZ7DH1ds&si=72Ehf-ip435LV1-D" target="_blank" style="display:flex;align-items:center;gap:0.8rem;color:var(--text);text-decoration:none;font-size:0.75rem;padding:0.8rem;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="color:var(--accent);font-weight:700;flex-shrink:0;">02</span>
+            How to buy crypto with a credit card
+          </a>
+          <a href="https://youtube.com/watch?v=96JWnEeIeOs&si=hFJXvEG3inCjaDdM" target="_blank" style="display:flex;align-items:center;gap:0.8rem;color:var(--text);text-decoration:none;font-size:0.75rem;padding:0.8rem;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <span style="color:var(--accent);font-weight:700;flex-shrink:0;">03</span>
+            How to transfer crypto
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="wallet-box">
+        <div class="wallet-label">USDT Wallet — TRC20 Network</div>
+        <div class="wallet-addr" id="walletAddr">TQ6C1CvgWh85jJ6VHKaiSwAgSzpoWaPXQr</div>
+        <button class="copy-btn" onclick="copyWallet()">[ Copy Address ]</button>
+        <div class="wallet-label" style="margin-bottom:1rem;">QR Code</div>
+        <div class="qr-container">
+          <img src="https://i.postimg.cc/0ygPyWMS/qr-code.jpg" alt="QR Code" style="width:160px;height:160px;display:block;image-rendering:pixelated;">
+        </div>
+        <p style="font-size:0.65rem;color:var(--muted);margin-top:1rem;line-height:1.6;">
+          ⚠ Always verify the address before sending. TRC20 network only.
+        </p>
+      </div>
+      <div class="wallet-box" style="margin-top:1.5rem; border-color: rgba(0,136,204,0.3);">
+        <div class="wallet-label" style="color:#0088cc;">TON Coin — Alternative Payment</div>
+        <p style="font-size:0.72rem;color:var(--muted);line-height:1.7;margin-bottom:1rem;">
+          If USDT payment is not available for you, you can pay with <strong style="color:#0088cc;">TON Coin</strong>:
+        </p>
+        <div style="font-size:0.62rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.1em;text-transform:uppercase;">TON Prices</div>
+        <div style="font-size:0.72rem;color:var(--text);line-height:2;margin-bottom:1rem;">
+          Dystopian Eye City → <strong style="color:#0088cc;">3 TON</strong><br>
+            Blender Galaxy Generator → <strong style="color:#0088cc;">7 TON</strong><br>
+            Asteroid Generator → <strong style="color:#0088cc;">7 TON</strong>
+        </div>
+        <div class="wallet-label" style="color:#0088cc;">TON Wallet Address</div>
+        <div class="wallet-addr" id="tonAddr" style="border-color:rgba(0,136,204,0.2);background:rgba(0,136,204,0.04);">UQA4u1-s6yOXyEEEkVEYLu4aHhzmaFE509G5CkAL8rJvXKb5</div>
+        <button class="copy-btn" onclick="copyTon()" style="border-color:rgba(0,136,204,0.3);color:#0088cc;">[ Copy TON Address ]</button>
+        <p style="font-size:0.65rem;color:var(--muted);line-height:1.6;">
+          ⚠ Always verify the address before sending.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="padding-top:0;">
+  <div class="section-label">Send Transaction Details</div>
+  <div class="contact-box reveal">
+    <h3>After Payment — Send Details Here</h3>
+    <p>Fill in the form below with your transaction ID and which asset you purchased. You'll receive your download link within 24 hours.</p>
+    <div class="contact-fields">
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" placeholder="John Doe" id="nameInput">
+      </div>
+      <div class="field">
+        <label>Your Email</label>
+        <input type="email" placeholder="you@example.com" id="emailInput">
+      </div>
+      <div class="field">
+        <label>Asset Purchased</label>
+        <select id="assetSelect">
+          <option value="">Select asset...</option>
+          <option>Dystopian Eye City — $4.99 USDT / 3 TON</option>
+          <option>Blender Galaxy Generator — $10 USDT / 7 TON</option>
+          <option>Asteroid Generator — $10 USDT / 7 TON</option>
+        </select>
+      </div>
+      <div class="field field-full">
+        <label>Transaction ID (TX Hash)</label>
+        <input type="text" placeholder="Paste your transaction hash here..." id="txInput">
+      </div>
+      <div class="field field-full">
+        <label>Message (optional)</label>
+        <textarea rows="3" placeholder="Any notes or questions..." id="msgInput"></textarea>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="handleSubmit()">Submit Purchase →</button>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Poly3Blend — All rights reserved.</p>
+  <div style="display:flex;gap:2rem;">
+    <a href="https://www.youtube.com/@Poly3Blend-fm6bf" target="_blank">YouTube</a>
+    <a href="#shop">Shop</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Google Apps Script Web App URL
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRbuGQJiE6pozcqFXnC287yfbqT9FSgebhSfCb2bjeKXzVSBI2x1aStaw27AcbnzOuJw/exec';
+
+  function copyTon() {
+    const addr = 'UQA4u1-s6yOXyEEEkVEYLu4aHhzmaFE509G5CkAL8rJvXKb5';
+    navigator.clipboard.writeText(addr).then(() => showToast('TON address copied!')).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = addr;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('TON address copied!');
+    });
+  }
+
+  function copyWallet() {
+    const addr = 'TQ6C1CvgWh85jJ6VHKaiSwAgSzpoWaPXQr';
+    navigator.clipboard.writeText(addr).then(() => showToast('Address copied!')).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = addr;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('Address copied!');
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  async function handleSubmit() {
+    const name = document.getElementById('nameInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    const asset = document.getElementById('assetSelect').value;
+    const txid = document.getElementById('txInput').value.trim();
+    const message = document.getElementById('msgInput').value.trim();
+
+    if (!name || !email || !asset || !txid) {
+      showToast('Please complete all required fields.');
+      return;
+    }
+
+    const payload = {
+      name: name,
+      email: email,
+      asset: asset,
+      txid: txid,
+      message: message,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      const formBody = Object.keys(payload)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(payload[key]))
+        .join('&');
+
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formBody
+      });
+
+      showToast('Transaction submitted successfully! We will contact you within 24 hours.');
+      
+      // Clear form
+      document.getElementById('nameInput').value = '';
+      document.getElementById('emailInput').value = '';
+      document.getElementById('assetSelect').value = '';
+      document.getElementById('txInput').value = '';
+      document.getElementById('msgInput').value = '';
+
+    } catch (err) {
+      console.error('Submit error:', err);
+      showToast('Failed to submit. Please try again or contact us directly.');
+    }
+  }
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Slideshow
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+
+  function goToSlide(n) {
+    slides[currentSlide].classList.remove('active');
+    dots[currentSlide].classList.remove('active');
+    currentSlide = (n + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+    dots[currentSlide].classList.add('active');
+  }
+
+  function changeSlide(dir) { goToSlide(currentSlide + dir); }
+
+  // Auto-advance every 5 seconds
+  setInterval(() => changeSlide(1), 5000);
+
+</script>
+</body>
+</html>
